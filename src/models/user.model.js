@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
-import bycrypt from 'bcryptjs';
+import bycrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
 dotenv.config()
+
 const userSchema = new mongoose.Schema({
     
     username:{
@@ -21,7 +22,7 @@ const userSchema = new mongoose.Schema({
         unique: true,
         lowercase: true,
     },
-    fullname:{
+    fullName:{
         type: String,
         required: true,
         lowercase: true,
@@ -55,13 +56,13 @@ const userSchema = new mongoose.Schema({
 },{timestamps: true});
 
 userSchema.pre('save', async function(next){
-    if(!this.isModified('password')) return next();
+    if(!this.isModified('password')) return;
     try {
         const salt = await bycrypt.genSalt(10);
         this.password = await bycrypt.hash(this.password, salt);
-        next();
     } catch (error) {
-        next(error);
+        // console.error('Error hashing password:', error);
+        throw error;
     }
 });
 userSchema.methods.isPasswordCorrect = async function(password){
